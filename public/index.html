@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeeRude Staff Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--primary:#1a73e8;--primary-dark:#1557b0;--secondary:#34a853;--danger:#ea4335;--warning:#fbbc04;--bg:#f0f2f5;--card:#fff;--text:#202124;--text-light:#5f6368;--border:#dadce0;--shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08);--radius:12px;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.hidden{display:none!important;}
+button{cursor:pointer;border:none;font-family:inherit;font-size:.9rem;}
+input,select,textarea{font-family:inherit;font-size:.9rem;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;outline:none;width:100%;transition:border .2s;}
+input:focus,select:focus{border-color:var(--primary);}
+.btn{padding:10px 20px;border-radius:8px;font-weight:600;transition:all .2s;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-success{background:var(--secondary);color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-warning{background:var(--warning);color:#333;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+.btn-sm{padding:6px 14px;font-size:.8rem;}
+.btn-block{width:100%;display:block;}
+
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#1a73e8 0%,#34a853 100%);}
+.login-card{background:#fff;border-radius:var(--radius);padding:40px 30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.login-card h1{text-align:center;margin-bottom:8px;font-size:1.6rem;}
+.login-card .subtitle{text-align:center;color:var(--text-light);margin-bottom:30px;font-size:.85rem;}
+.login-card .logo{text-align:center;font-size:3rem;margin-bottom:10px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-weight:600;margin-bottom:6px;font-size:.85rem;color:var(--text-light);}
+.login-card .btn{margin-top:10px;}
+
+#appShell{display:flex;height:100vh;}
+.sidebar{width:260px;background:#1e1e2d;color:#fff;display:flex;flex-direction:column;transition:transform .3s;z-index:100;}
+.sidebar-header{padding:20px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sidebar-header h2{font-size:1.1rem;}
+.sidebar-header small{color:rgba(255,255,255,.5);font-size:.75rem;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 0;}
+.sidebar-nav a{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,.7);text-decoration:none;font-size:.9rem;transition:all .2s;border-left:3px solid transparent;}
+.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:var(--primary);}
+.sidebar-nav a .icon{font-size:1.2rem;width:24px;text-align:center;}
+.sidebar-nav .nav-section{padding:20px 20px 8px;font-size:.7rem;text-transform:uppercase;color:rgba(255,255,255,.35);letter-spacing:1px;}
+.sidebar-user{padding:15px 20px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;}
+.sidebar-user .avatar{width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;}
+.sidebar-user .info{flex:1;}
+.sidebar-user .info .name{font-size:.85rem;font-weight:600;}
+.sidebar-user .info .role{font-size:.7rem;color:rgba(255,255,255,.5);}
+
+.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);min-height:56px;}
+.topbar .menu-toggle{display:none;background:none;font-size:1.5rem;color:var(--text);}
+.topbar h2{font-size:1.1rem;flex:1;}
+.topbar .topbar-actions{display:flex;gap:8px;align-items:center;}
+.page-content{flex:1;overflow-y:auto;padding:24px;}
+
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px;}
+.card h3{margin-bottom:16px;font-size:1rem;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
+.stat-card .stat-icon{font-size:2rem;margin-bottom:8px;}
+.stat-card .stat-value{font-size:1.8rem;font-weight:700;}
+.stat-card .stat-label{color:var(--text-light);font-size:.8rem;margin-top:4px;}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);font-size:.85rem;}
+th{font-weight:600;color:var(--text-light);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;}
+tbody tr:hover{background:#f8f9fa;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;}
+.badge-success{background:#e6f4ea;color:#137333;}
+.badge-warning{background:#fef7e0;color:#b05a00;}
+.badge-danger{background:#fce8e6;color:#c5221f;}
+.badge-info{background:#e8f0fe;color:#1a73e8;}
+
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+.tab-btn{padding:10px 20px;background:none;border:none;font-weight:600;color:var(--text-light);position:relative;white-space:nowrap;font-size:.85rem;}
+.tab-btn.active{color:var(--primary);}
+.tab-btn.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--primary);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+
+.clock-display{text-align:center;padding:40px 20px;}
+.clock-display .time{font-size:3.5rem;font-weight:700;font-variant-numeric:tabular-nums;}
+.clock-display .date{color:var(--text-light);margin-bottom:30px;}
+.clock-display .status{margin-bottom:20px;}
+.clock-display .status .badge{font-size:1rem;padding:6px 16px;}
+.clock-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.clock-buttons .btn{padding:14px 32px;font-size:1rem;}
+
+.timeline-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.timeline-item .t-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.timeline-item .t-content{flex:1;}
+.timeline-item .t-content .t-title{font-weight:600;font-size:.85rem;}
+.timeline-item .t-content .t-sub{font-size:.75rem;color:var(--text-light);}
+
+.pto-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px;}
+.pto-calendar .day-header{text-align:center;font-weight:600;font-size:.7rem;color:var(--text-light);padding:8px 4px;}
+.pto-calendar .day-cell{text-align:center;padding:8px 4px;border-radius:8px;font-size:.8rem;cursor:pointer;transition:background .15s;}
+.pto-calendar .day-cell:hover{background:#e8f0fe;}
+.pto-calendar .day-cell.today{background:var(--primary);color:#fff;}
+.pto-calendar .day-cell.pto{background:#e6f4ea;color:#137333;}
+.pto-calendar .day-cell.pending{background:#fef7e0;color:#b05a00;}
+.pto-calendar .day-cell.empty{cursor:default;}
+.pto-calendar .day-cell.empty:hover{background:transparent;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-header h4{font-size:1rem;}
+
+.schedule-grid{display:grid;grid-template-columns:80px repeat(7,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;}
+.schedule-grid .cell{background:#fff;padding:8px;font-size:.75rem;min-height:50px;}
+.schedule-grid .header{background:#f8f9fa;font-weight:600;text-align:center;padding:10px 8px;}
+.schedule-grid .time-label{background:#f8f9fa;font-weight:600;display:flex;align-items:center;justify-content:center;font-size:.7rem;}
+.schedule-grid .shift{background:#e8f0fe;border-radius:4px;padding:4px 6px;color:var(--primary);font-weight:600;font-size:.7rem;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.modal{background:#fff;border-radius:var(--radius);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-header h3{font-size:1rem;}
+.modal-close{background:none;font-size:1.4rem;color:var(--text-light);}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+
+.toast{position:fixed;top:20px;right:20px;background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);padding:14px 20px;display:flex;align-items:center;gap:10px;z-index:2000;animation:slideIn .3s;max-width:350px;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
+
+.payment-method-card{border:2px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:border .2s;margin-bottom:12px;}
+.payment-method-card.selected{border-color:var(--primary);background:#e8f0fe;}
+.payment-method-card .pm-header{display:flex;align-items:center;gap:10px;font-weight:600;}
+
+.progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.progress-bar .fill{height:100%;border-radius:4px;transition:width .3s;}
+
+.loading-spinner{display:inline-block;width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+.sidebar{position:fixed;top:0;left:0;bottom:0;transform:translateX(-100%);}
+.sidebar.open{transform:translateX(0);}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;display:none;}
+.sidebar-overlay.show{display:block;}
+.topbar .menu-toggle{display:block;}
+.page-content{padding:16px;}
+.stats-grid{grid-template-columns:1fr 1fr;}
+.form-row{grid-template-columns:1fr;}
+.clock-display .time{font-size:2.5rem;}
+.schedule-grid{grid-template-columns:60px repeat(7,1fr);}
+table{font-size:.75rem;}
+th,td{padding:8px;}
+}
+@media(max-width:480px){
+.stats-grid{grid-template-columns:1fr;}
+.login-card{padding:30px 20px;}
+}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+<div class="login-card">
+<div class="logo">🏢</div>
+<h1>DeeRude Staff</h1>
+<p class="subtitle">Employee Management System</p>
+<div class="form-group">
+<label>Email / Username</label>
+<input type="text" id="loginEmail" placeholder="Enter your email">
+</div>
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="loginPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+</div>
+<button class="btn btn-primary btn-block" id="loginBtn" onclick="doLogin()">Sign In</button>
+<p style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--text-light)">
+Admin: admin@deerude.com / admin123<br>
+Agent: agent@deerude.com / agent123
+</p>
+</div>
+</div>
+
+<div id="appShell" class="hidden">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<h2>🏢 DeeRude Staff</h2>
+<small>Management System</small>
+</div>
+<div class="sidebar-nav" id="sidebarNav">
+<a href="#" data-page="dashboard" class="active"><span class="icon">📊</span>Dashboard</a>
+<a href="#" data-page="clock"><span class="icon">⏰</span>Clock In/Out</a>
+<a href="#" data-page="timesheet"><span class="icon">📋</span>Timesheet</a>
+<a href="#" data-page="pto"><span class="icon">🏖️</span>PTO / Leave</a>
+<a href="#" data-page="payroll"><span class="icon">💰</span>Payroll</a>
+<a href="#" data-page="profile"><span class="icon">👤</span>My Profile</a>
+<a href="#" data-page="schedule"><span class="icon">📅</span>Schedule</a>
+<div class="nav-section admin-only">Administration</div>
+<a href="#" data-page="agents" class="admin-only"><span class="icon">👥</span>Manage Agents</a>
+<a href="#" data-page="admin-payroll" class="admin-only"><span class="icon">🏦</span>Process Payroll</a>
+<a href="#" data-page="admin-pto" class="admin-only"><span class="icon">✅</span>PTO Requests</a>
+<a href="#" data-page="admin-users" class="admin-only"><span class="icon">🔐</span>Admin Users</a>
+<a href="#" data-page="settings" class="admin-only"><span class="icon">⚙️</span>Settings</a>
+</div>
+<div class="sidebar-user">
+<div class="avatar" id="userAvatar">A</div>
+<div class="info">
+<div class="name" id="userName">Admin</div>
+<div class="role" id="userRole">Administrator</div>
+</div>
+<button style="background:none;color:rgba(255,255,255,.5);font-size:1.2rem;" onclick="doLogout()" title="Logout">🚪</button>
+</div>
+</nav>
+
+<div class="main-content">
+<div class="topbar">
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<h2 id="pageTitle">Dashboard</h2>
+<div class="topbar-actions">
+<span id="topClock" style="font-size:.85rem;color:var(--text-light);font-variant-numeric:tabular-nums;"></span>
+</div>
+</div>
+<div class="page-content" id="pageContent"></div>
+</div>
+</div>
+
+<div id="toastContainer"></div>
+
+<script>
+// ==================== API HELPER ====================
+const API = {
+    async request(url, options = {}) {
+        try {
+            const res = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options,
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Request failed');
+            return data;
+        } catch (e) {
+            throw e;
+        }
+    },
+    get(url) { return this.request(url); },
+    post(url, body) { return this.request(url, { method: 'POST', body }); },
+    put(url, body) { return this.request(url, { method: 'PUT', body }); },
+    delete(url) { return this.request(url, { method: 'DELETE' }); }
+};
+
+// ==================== STATE ====================
+let currentUser = null;
+let currentPage = 'dashboard';
+let clockInterval = null;
+let clockedInData = null;
+
+const company = {
+    name: "DeeRude",
+    email: "information@deerude.com",
+    phone: "0550109054",
+    address: "101 Nkrumah Street, Haatso, Accra, Ghana",
+    provider: "MTN"
+};
+
+// ==================== AUTH ====================
+async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if (!email || !pass) { showToast('Please enter email and password', 'error'); return; }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span> Signing in...';
+
+    try {
+        const user = await API.post('/api/login', { email, password: pass });
+        currentUser = {
+            id: user.id,
+            email: user.email,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            role: user.role,
+            phone: user.phone,
+            rate: user.rate,
+            paymentMethod: user.payment_method,
+            paymentDetails: user.payment_method === 'mobile_money'
+                ? { phone: user.payment_phone, network: user.payment_network }
+                : { bankName: user.bank_name, accountNumber: user.bank_account },
+            pto_balance: user.pto_balance,
+            pto_used: user.pto_used,
+            hireDate: user.hire_date,
+            active: true
+        };
+
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('appShell').classList.remove('hidden');
+        document.getElementById('userName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+        document.getElementById('userRole').textContent = capitalize(currentUser.role);
+        document.getElementById('userAvatar').textContent = currentUser.firstName[0];
+        updateNav();
+        navigateTo('dashboard');
+        startTopClock();
+        showToast('Welcome back, ' + currentUser.firstName + '!', 'success');
+    } catch (e) {
+        showToast(e.message || 'Invalid credentials', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+    }
+}
+
+async function doLogout() {
+    try { await API.post('/api/logout', {}); } catch (e) { /* ignore */ }
+    currentUser = null;
+    clockedInData = null;
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('appShell').classList.add('hidden');
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPass').value = '';
+    if (clockInterval) clearInterval(clockInterval);
+}
+
+async function refreshCurrentUser() {
+    try {
+        const user = await API.get('/api/me');
+        currentUser = {
+            id: user.id, email: user.email, firstName: user.first_name,
+            lastName: user.last_name, role: user.role, phone: user.phone,
+            rate: user.rate, paymentMethod: user.payment_method,
+            paymentDetails: user.payment_method === 'mobile_money'
+                ? { phone: user.payment_phone, network: user.payment_network }
+                : { bankName: user.bank_name, accountNumber: user.bank_account },
+            pto_balance: user.pto_balance, pto_used: user.pto_used,
+            hireDate: user.hire_date, active: !!user.active
+        };
+    } catch (e) { /* session expired */ doLogout(); }
+}
+
+function isAdmin() { return currentUser && ['administrator', 'manager', 'supervisor'].includes(currentUser.role); }
+function isFullAdmin() { return currentUser && currentUser.role === 'administrator'; }
+
+function updateNav() {
+    document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = isAdmin() ? '' : 'none';
+    });
+}
+
+// ==================== NAVIGATION ====================
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+document.getElementById('sidebarNav').addEventListener('click', e => {
+    const a = e.target.closest('a[data-page]');
+    if (!a) return;
+    e.preventDefault();
+    navigateTo(a.dataset.page);
+    toggleSidebar();
+});
+
+function navigateTo(page) {
+    currentPage = page;
+    document.querySelectorAll('#sidebarNav a').forEach(a => a.classList.toggle('active', a.dataset.page === page));
+    const titles = { dashboard: 'Dashboard', clock: 'Clock In / Out', timesheet: 'Timesheet', pto: 'PTO / Leave', payroll: 'My Payroll', profile: 'My Profile', schedule: 'Schedule', agents: 'Manage Agents', 'admin-payroll': 'Process Payroll', 'admin-pto': 'PTO Requests', 'admin-users': 'Admin Users', settings: 'Settings' };
+    document.getElementById('pageTitle').textContent = titles[page] || 'Page';
+    renderPage(page);
+}
+
+function startTopClock() {
+    const update = () => {
+        const now = new Date();
+        document.getElementById('topClock').textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    };
+    update();
+    clockInterval = setInterval(update, 1000);
+}
+
+// ==================== RENDER PAGES ====================
+function renderPage(page) {
+    const c = document.getElementById('pageContent');
+    c.innerHTML = '<div style="text-align:center;padding:60px;"><div class="loading-spinner" style="width:40px;height:40px;border-width:4px;"></div><p style="margin-top:16px;color:var(--text-light);">Loading...</p></div>';
+    switch (page) {
+        case 'dashboard': renderDashboard(c); break;
+        case 'clock': renderClock(c); break;
+        case 'timesheet': renderTimesheet(c); break;
+        case 'pto': renderPTO(c); break;
+        case 'payroll': renderPayroll(c); break;
+        case 'profile': renderProfile(c); break;
+        case 'schedule': renderSchedule(c); break;
+        case 'agents': renderAgents(c); break;
+        case 'admin-payroll': renderAdminPayroll(c); break;
+        case 'admin-pto': renderAdminPTO(c); break;
+        case 'admin-users': renderAdminUsers(c); break;
+        case 'settings': renderSettings(c); break;
+        default: c.innerHTML = '<div class="card"><h3>Page not found</h3></div>';
+    }
+}
+
+// ==================== DASHBOARD ====================
+async function renderDashboard(c) {
+    try {
+        const [stats, timeEntries] = await Promise.all([
+            API.get('/api/dashboard'),
+            API.get('/api/time-entries')
+        ]);
+        const recent = timeEntries.slice(0, 5);
+
+        let adminStats = '';
+        if (isAdmin()) {
+            adminStats = `
+            <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">${stats.total_agents || 0}</div><div class="stat-label">Total Agents</div></div>
+            <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value">${stats.pending_pto || 0}</div><div class="stat-label">Pending PTO Requests</div></div>
+            <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${stats.currently_clocked || 0}</div><div class="stat-label">Currently Clocked In</div></div>`;
+        }
+
+        let pendingHTML = '';
+        if (isAdmin()) {
+            try {
+                const ptoList = await API.get('/api/pto');
+                const pending = ptoList.filter(p => p.status === 'pending');
+                pendingHTML = `<div class="card"><h3>📝 Pending PTO Requests</h3>
+                ${pending.length === 0 ? '<p style="color:var(--text-light)">No pending requests</p>' : ''}
+                ${pending.map(p => `<div class="timeline-item">
+                    <div class="t-icon" style="background:#fef7e0;">🏖️</div>
+                    <div class="t-content">
+                        <div class="t-title">${p.first_name || ''} ${p.last_name || ''} — ${p.days} day(s)</div>
+                        <div class="t-sub">${p.start_date} to ${p.end_date} • ${p.reason}</div>
+                    </div>
+                </div>`).join('')}
+                </div>`;
+            } catch (e) { /* skip */ }
+        }
+
+        c.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-value">${stats.month_hours.toFixed(1)}h</div><div class="stat-label">Hours This Month</div></div>
+            <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-value">GH₵${stats.estimated_pay.toFixed(2)}</div><div class="stat-label">Estimated Pay</div></div>
+            <div class="stat-card"><div class="stat-icon">🏖️</div><div class="stat-value">${stats.pto_remaining}</div><div class="stat-label">PTO Days Remaining</div></div>
+            <div class="stat-card"><div class="stat-icon">${stats.clocked_in ? '🟢' : '🔴'}</div><div class="stat-value">${stats.clocked_in ? 'Clocked In' : 'Clocked Out'}</div><div class="stat-label">Current Status</div></div>
+            ${adminStats}
+        </div>
+        <div class="card">
+            <h3>📊 Recent Activity</h3>
+            ${recent.length === 0 ? '<p style="color:var(--text-light)">No recent activity</p>' : ''}
+            ${recent.map(t => `<div class="timeline-item">
+                <div class="t-icon" style="background:#e8f0fe;">⏰</div>
+                <div class="t-content">
+                    <div class="t-title">${t.date} — ${(t.hours || 0).toFixed(2)} hours</div>
+                    <div class="t-sub">${t.clock_in} → ${t.clock_out || 'In progress'}</div>
+                </div>
+            </div>`).join('')}
+        </div>
+        ${pendingHTML}`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error loading dashboard</h3><p>${e.message}</p></div>`;
+    }
+}
+
+// ==================== CLOCK IN/OUT ====================
+async function renderClock(c) {
+    try {
+        const [clockStatus, timeEntries] = await Promise.all([
+            API.get('/api/clock-status'),
+            API.get('/api/time-entries')
+        ]);
+        clockedInData = clockStatus.clocked_in ? clockStatus.entry : null;
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        const todayEntries = timeEntries.filter(t => t.date === today && t.status === 'completed');
+
+        let elapsed = '';
+        if (clockedInData) {
+            const [h, m] = clockedInData.clock_in.split(':').map(Number);
+            const startMs = new Date(); startMs.setHours(h, m, 0, 0);
+            const diff = now - startMs;
+            const eh = Math.floor(diff / 3600000), em = Math.floor((diff % 3600000) / 60000), es = Math.floor((diff % 60000) / 1000);
+            elapsed = `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}:${String(es).padStart(2, '0')}`;
+        }
+
+        c.innerHTML = `
+        <div class="card">
+            <div class="clock-display">
+                <div class="time" id="liveClock">${now.toLocaleTimeString('en-GB')}</div>
+                <div class="date">${now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                <div class="status">
+                    ${clockedInData ? `<span class="badge badge-success">🟢 Clocked In since ${clockedInData.clock_in}</span>` : '<span class="badge badge-danger">🔴 Clocked Out</span>'}
+                </div>
+                ${clockedInData ? `<div style="font-size:2rem;font-weight:700;margin-bottom:20px;font-variant-numeric:tabular-nums;" id="elapsedTime">${elapsed}</div>` : ''}
+                <div class="clock-buttons">
+                    ${!clockedInData ? '<button class="btn btn-success" onclick="clockIn()">⏰ Clock In</button>' : '<button class="btn btn-danger" onclick="clockOut()">⏹️ Clock Out</button>'}
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Today's Completed Entries</h3>
+            ${todayEntries.length === 0 ? '<p style="color:var(--text-light)">No completed entries today</p>' : ''}
+            ${todayEntries.map(t => `<div class="timeline-item">
+                <div class="t-icon" style="background:#e6f4ea;">✅</div>
+                <div class="t-content">
+                    <div class="t-title">${t.clock_in} → ${t.clock_out}</div>
+                    <div class="t-sub">${(t.hours || 0).toFixed(2)} hours</div>
+                </div>
+            </div>`).join('')}
+        </div>`;
+
+        if (clockedInData) {
+            const [sh, sm] = clockedInData.clock_in.split(':').map(Number);
+            const liveUpdate = setInterval(() => {
+                const el = document.getElementById('elapsedTime');
+                const cl = document.getElementById('liveClock');
+                if (!el || currentPage !== 'clock') { clearInterval(liveUpdate); return; }
+                const n = new Date();
+                cl.textContent = n.toLocaleTimeString('en-GB');
+                const startT = new Date(); startT.setHours(sh, sm, 0, 0);
+                const d = n - startT;
+                const hh = Math.floor(d / 3600000), mm = Math.floor((d % 3600000) / 60000), ss = Math.floor((d % 60000) / 1000);
+                el.textContent = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+            }, 1000);
+        }
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+async function clockIn() {
+    try {
+        const res = await API.post('/api/clock-in', {});
+        showToast(res.message || 'Clocked in!', 'success');
+        renderClock(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function clockOut() {
+    try {
+        const res = await API.post('/api/clock-out', {});
+        showToast(res.message || 'Clocked out!', 'success');
+        renderClock(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ==================== TIMESHEET ====================
+async function renderTimesheet(c) {
+    try {
+        const [entries, summary] = await Promise.all([
+            API.get('/api/time-entries'),
+            API.get('/api/time-entries/summary')
+        ]);
+        const totalHours = entries.reduce((s, t) => s + (t.hours || 0), 0);
+
+        c.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value">${summary.total_hours.toFixed(1)}h</div><div class="stat-label">This Month</div></div>
+            <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">${totalHours.toFixed(1)}h</div><div class="stat-label">Total Hours</div></div>
+            <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value">GH₵${(summary.total_hours * currentUser.rate).toFixed(2)}</div><div class="stat-label">This Month's Pay</div></div>
+        </div>
+        <div class="card">
+            <h3>Time Entries</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Hours</th><th>Earnings</th><th>Status</th></tr></thead>
+                    <tbody>
+                    ${entries.map(t => `<tr>
+                        <td>${t.date}</td><td>${t.clock_in}</td><td>${t.clock_out || '—'}</td>
+                        <td>${(t.hours || 0).toFixed(2)}</td><td>GH₵${((t.hours || 0) * currentUser.rate).toFixed(2)}</td>
+                        <td><span class="badge badge-${t.status === 'completed' ? 'success' : 'warning'}">${capitalize(t.status)}</span></td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+// ==================== PTO ====================
+async function renderPTO(c) {
+    try {
+        await refreshCurrentUser();
+        const ptoList = await API.get('/api/pto');
+        const myPTO = isAdmin() ? ptoList.filter(p => p.user_id === currentUser.id) : ptoList;
+        const approved = myPTO.filter(p => p.status === 'approved');
+        const pending = myPTO.filter(p => p.status === 'pending');
+        const remaining = currentUser.pto_balance - currentUser.pto_used;
+        const usedPct = currentUser.pto_balance > 0 ? (currentUser.pto_used / currentUser.pto_balance * 100) : 0;
+
+        c.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">🏖️</div><div class="stat-value">${currentUser.pto_balance}</div><div class="stat-label">Total PTO Days</div></div>
+            <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${currentUser.pto_used}</div><div class="stat-label">Days Used</div></div>
+            <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value">${remaining}</div><div class="stat-label">Days Remaining</div></div>
+            <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${pending.length}</div><div class="stat-label">Pending Requests</div></div>
+        </div>
+        <div class="card">
+            <div style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.85rem;"><span>PTO Usage</span><span>${currentUser.pto_used}/${currentUser.pto_balance} days</span></div>
+                <div class="progress-bar"><div class="fill" style="width:${usedPct}%;background:${usedPct > 80 ? 'var(--danger)' : usedPct > 50 ? 'var(--warning)' : 'var(--secondary)'}"></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Book PTO</h3>
+            <div class="form-row">
+                <div class="form-group"><label>Start Date</label><input type="date" id="ptoStart"></div>
+                <div class="form-group"><label>End Date</label><input type="date" id="ptoEnd"></div>
+            </div>
+            <div class="form-group"><label>Reason</label><input type="text" id="ptoReason" placeholder="Reason for leave"></div>
+            <button class="btn btn-primary" onclick="submitPTO()">Submit PTO Request</button>
+        </div>
+        <div class="card">
+            <h3>My PTO Requests</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Dates</th><th>Days</th><th>Reason</th><th>Status</th></tr></thead>
+                    <tbody>
+                    ${myPTO.map(p => `<tr>
+                        <td>${p.start_date} → ${p.end_date}</td><td>${p.days}</td><td>${p.reason}</td>
+                        <td><span class="badge badge-${p.status === 'approved' ? 'success' : p.status === 'pending' ? 'warning' : 'danger'}">${capitalize(p.status)}</span></td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+async function submitPTO() {
+    const start = document.getElementById('ptoStart').value;
+    const end = document.getElementById('ptoEnd').value;
+    const reason = document.getElementById('ptoReason').value.trim();
+    if (!start || !end || !reason) { showToast('Please fill all fields', 'error'); return; }
+    if (end < start) { showToast('End date must be after start date', 'error'); return; }
+    try {
+        const res = await API.post('/api/pto', { start_date: start, end_date: end, reason });
+        showToast(res.message || 'PTO request submitted!', 'success');
+        renderPTO(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ==================== PAYROLL ====================
+async function renderPayroll(c) {
+    try {
+        await refreshCurrentUser();
+        const [payroll, summary] = await Promise.all([
+            API.get('/api/payroll'),
+            API.get('/api/time-entries/summary')
+        ]);
+        const monthHours = summary.total_hours;
+        const grossPay = monthHours * currentUser.rate;
+        const pm = currentUser.paymentMethod === 'mobile_money'
+            ? `Mobile Money (${currentUser.paymentDetails.network} - ${currentUser.paymentDetails.phone})`
+            : `Bank (${currentUser.paymentDetails.bankName} - ${currentUser.paymentDetails.accountNumber})`;
+
+        c.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value">GH₵${currentUser.rate}/hr</div><div class="stat-label">Pay Rate</div></div>
+            <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-value">${monthHours.toFixed(1)}h</div><div class="stat-label">Hours This Month</div></div>
+            <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-value">GH₵${grossPay.toFixed(2)}</div><div class="stat-label">Gross Pay (Current)</div></div>
+        </div>
+        <div class="card">
+            <h3>💳 Payment Method</h3>
+            <p style="font-size:.9rem;color:var(--text-light);">${pm}</p>
+        </div>
+        <div class="card">
+            <h3>📊 Expected Paycheck</h3>
+            <div style="padding:10px 0;">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem;"><span>Hours Worked</span><span>${monthHours.toFixed(2)} hrs</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem;"><span>Rate</span><span>GH₵${currentUser.rate}/hr</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1.1rem;font-weight:700;"><span>Total Expected</span><span>GH₵${grossPay.toFixed(2)}</span></div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>📜 Pay History</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Period</th><th>Hours</th><th>Gross</th><th>PTO</th><th>Net</th><th>Status</th></tr></thead>
+                    <tbody>
+                    ${payroll.map(p => `<tr>
+                        <td>${p.period}</td><td>${p.hours_worked}</td><td>GH₵${p.gross_pay.toFixed(2)}</td>
+                        <td>GH₵${(p.pto_value || 0).toFixed(2)}</td><td>GH₵${p.net_pay.toFixed(2)}</td>
+                        <td><span class="badge badge-${p.status === 'paid' ? 'success' : 'warning'}">${capitalize(p.status)}</span></td>
+                    </tr>`).join('')}
+                    ${payroll.length === 0 ? '<tr><td colspan="6" style="text-align:center;color:var(--text-light)">No pay history</td></tr>' : ''}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+// ==================== PROFILE ====================
+async function renderProfile(c) {
+    await refreshCurrentUser();
+    const u = currentUser;
+    c.innerHTML = `
+    <div class="card">
+        <div style="text-align:center;margin-bottom:20px;">
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);display:inline-flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;">${u.firstName[0]}${u.lastName[0]}</div>
+            <h3 style="margin-top:12px;">${u.firstName} ${u.lastName}</h3>
+            <span class="badge badge-info">${capitalize(u.role)}</span>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(this,'profileInfo')">Profile Info</button>
+            <button class="tab-btn" onclick="switchTab(this,'profileEdit')">Edit Profile</button>
+            <button class="tab-btn" onclick="switchTab(this,'profilePayment')">Payment Method</button>
+        </div>
+        <div class="tab-content active" id="profileInfo">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.9rem;">
+                <div><strong>Email:</strong><br>${u.email}</div>
+                <div><strong>Phone:</strong><br>${u.phone || '—'}</div>
+                <div><strong>Role:</strong><br>${capitalize(u.role)}</div>
+                <div><strong>Hire Date:</strong><br>${u.hireDate || '—'}</div>
+                <div><strong>Rate:</strong><br>GH₵${u.rate}/hr</div>
+                <div><strong>PTO Balance:</strong><br>${u.pto_balance - u.pto_used} days remaining</div>
+                <div><strong>Payment:</strong><br>${u.paymentMethod === 'mobile_money' ? 'Mobile Money' : 'Bank'}</div>
+                <div><strong>Status:</strong><br><span class="badge badge-success">Active</span></div>
+            </div>
+        </div>
+        <div class="tab-content" id="profileEdit">
+            <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" id="profFirstName" value="${u.firstName}"></div>
+                <div class="form-group"><label>Last Name</label><input type="text" id="profLastName" value="${u.lastName}"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="profEmail" value="${u.email}"></div>
+                <div class="form-group"><label>Phone</label><input type="text" id="profPhone" value="${u.phone || ''}"></div>
+            </div>
+            <div class="form-group"><label>New Password (leave blank to keep)</label><input type="password" id="profPassword" placeholder="New password"></div>
+            <div class="form-actions"><button class="btn btn-primary" onclick="updateProfile()">Save Changes</button></div>
+        </div>
+        <div class="tab-content" id="profilePayment">
+            <div class="payment-method-card ${u.paymentMethod === 'mobile_money' ? 'selected' : ''}" onclick="selectPayMethod('mobile_money')">
+                <div class="pm-header">📱 Mobile Money</div>
+            </div>
+            <div class="payment-method-card ${u.paymentMethod === 'bank' ? 'selected' : ''}" onclick="selectPayMethod('bank')">
+                <div class="pm-header">🏦 Bank Transfer</div>
+            </div>
+            <div id="payMethodFields"></div>
+            <div class="form-actions"><button class="btn btn-primary" onclick="savePaymentMethod()">Save Payment Method</button></div>
+        </div>
+    </div>`;
+    renderPayMethodFields(u.paymentMethod);
+}
+
+let selectedPayMethod = '';
+function selectPayMethod(method) {
+    selectedPayMethod = method;
+    document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    renderPayMethodFields(method);
+}
+
+function renderPayMethodFields(method) {
+    selectedPayMethod = method;
+    const d = document.getElementById('payMethodFields');
+    if (!d) return;
+    const u = currentUser;
+    if (method === 'mobile_money') {
+        d.innerHTML = `
+        <div class="form-group" style="margin-top:16px;"><label>Phone Number</label><input type="text" id="pmPhone" value="${u.paymentDetails.phone || ''}" placeholder="e.g. 0550109054"></div>
+        <div class="form-group"><label>Network</label><select id="pmNetwork">
+            <option value="MTN" ${u.paymentDetails.network === 'MTN' ? 'selected' : ''}>MTN</option>
+            <option value="Airtel Tigo" ${u.paymentDetails.network === 'Airtel Tigo' ? 'selected' : ''}>Airtel Tigo</option>
+            <option value="Telecel" ${u.paymentDetails.network === 'Telecel' ? 'selected' : ''}>Telecel</option>
+        </select></div>`;
+    } else if (method === 'bank') {
+        d.innerHTML = `
+        <div class="form-group" style="margin-top:16px;"><label>Bank Name</label><input type="text" id="pmBankName" value="${u.paymentDetails.bankName || ''}" placeholder="e.g. GCB Bank"></div>
+        <div class="form-group"><label>Account Number</label><input type="text" id="pmAcct" value="${u.paymentDetails.accountNumber || ''}" placeholder="Account number"></div>`;
+    } else { d.innerHTML = ''; }
+}
+
+async function savePaymentMethod() {
+    let updateData = {};
+    if (selectedPayMethod === 'mobile_money') {
+        const phone = document.getElementById('pmPhone').value.trim();
+        const network = document.getElementById('pmNetwork').value;
+        if (!phone) { showToast('Phone required', 'error'); return; }
+        updateData = { payment_method: 'mobile_money', payment_phone: phone, payment_network: network };
+    } else if (selectedPayMethod === 'bank') {
+        const bankName = document.getElementById('pmBankName').value.trim();
+        const accountNumber = document.getElementById('pmAcct').value.trim();
+        if (!bankName || !accountNumber) { showToast('All fields required', 'error'); return; }
+        updateData = { payment_method: 'bank', bank_name: bankName, bank_account: accountNumber };
+    } else { showToast('Select a payment method', 'error'); return; }
+
+    try {
+        await API.put('/api/users/' + currentUser.id, updateData);
+        await refreshCurrentUser();
+        showToast('Payment method saved!', 'success');
+        renderProfile(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function updateProfile() {
+    const fn = document.getElementById('profFirstName').value.trim();
+    const ln = document.getElementById('profLastName').value.trim();
+    const em = document.getElementById('profEmail').value.trim();
+    const ph = document.getElementById('profPhone').value.trim();
+    const pw = document.getElementById('profPassword').value;
+    if (!fn || !ln || !em) { showToast('Name and email required', 'error'); return; }
+
+    const data = { first_name: fn, last_name: ln, email: em, phone: ph };
+    if (pw) data.password = pw;
+
+    try {
+        await API.put('/api/users/' + currentUser.id, data);
+        await refreshCurrentUser();
+        document.getElementById('userName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+        document.getElementById('userAvatar').textContent = currentUser.firstName[0];
+        showToast('Profile updated!', 'success');
+        renderProfile(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ==================== SCHEDULE ====================
+async function renderSchedule(c) {
+    try {
+        const schedules = await API.get('/api/schedules');
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const hours = ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+        let cells = '<div class="cell header"></div>';
+        days.forEach(d => cells += `<div class="cell header">${d}</div>`);
+        hours.forEach(h => {
+            cells += `<div class="cell time-label">${h}</div>`;
+            for (let d = 1; d <= 7; d++) {
+                const sch = schedules.find(s => s.day_of_week === d);
+                const hInt = parseInt(h);
+                if (sch) {
+                    const sH = parseInt(sch.start_time), eH = parseInt(sch.end_time);
+                    cells += hInt >= sH && hInt < eH ? '<div class="cell"><div class="shift">🟢 Work</div></div>' : '<div class="cell"></div>';
+                } else { cells += '<div class="cell"></div>'; }
+            }
+        });
+        c.innerHTML = `
+        <div class="card"><h3>📅 My Weekly Schedule</h3><div class="schedule-grid">${cells}</div></div>
+        <div class="card"><h3>Schedule Summary</h3>
+            ${schedules.length === 0 ? '<p style="color:var(--text-light)">No schedule assigned</p>' : ''}
+            ${schedules.map(s => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem;">
+                <span>${days[s.day_of_week - 1] || 'Day ' + s.day_of_week}</span><span>${s.start_time} - ${s.end_time}</span>
+            </div>`).join('')}
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+// ==================== ADMIN: MANAGE AGENTS ====================
+async function renderAgents(c) {
+    if (!isAdmin()) { c.innerHTML = '<div class="card"><h3>Access Denied</h3></div>'; return; }
+    try {
+        const agents = await API.get('/api/users');
+        c.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:.9rem;color:var(--text-light)">${agents.length} users</div>
+            <button class="btn btn-primary" onclick="showAddAgentModal()">➕ Add Agent</button>
+        </div>
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Rate</th><th>Payment</th><th>PTO</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    ${agents.map(u => `<tr>
+                        <td><strong>${u.first_name} ${u.last_name}</strong></td>
+                        <td>${u.email}</td>
+                        <td><span class="badge badge-info">${capitalize(u.role)}</span></td>
+                        <td>GH₵${u.rate}/hr</td>
+                        <td>${u.payment_method === 'mobile_money' ? '📱 MoMo' : '🏦 Bank'}</td>
+                        <td>${u.pto_balance - u.pto_used}/${u.pto_balance}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="editAgent(${u.id})">✏️</button>
+                            ${u.id !== currentUser.id ? `<button class="btn btn-danger btn-sm" onclick="deactivateAgent(${u.id})">🗑️</button>` : ''}
+                        </td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+function showAddAgentModal() {
+    showModal('Add New Agent', `
+    <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" id="newFirstName"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="newLastName"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="newEmail"></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="newPhone"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Password</label><input type="password" id="newPassword"></div>
+        <div class="form-group"><label>Role</label><select id="newRole">
+            <option value="agent">Agent</option>
+            <option value="supervisor">Supervisor</option>
+            ${isFullAdmin() ? '<option value="manager">Manager</option><option value="administrator">Administrator</option>' : ''}
+        </select></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Pay Rate (GH₵/hr)</label><input type="number" id="newRate" value="15"></div>
+        <div class="form-group"><label>PTO Balance (days)</label><input type="number" id="newPTO" value="15"></div>
+    </div>
+    <div class="form-group"><label>Payment Method</label><select id="newPayMethod" onchange="toggleNewPayFields()">
+        <option value="mobile_money">Mobile Money</option><option value="bank">Bank</option>
+    </select></div>
+    <div id="newPayFields">
+        <div class="form-row">
+            <div class="form-group"><label>Phone Number</label><input type="text" id="newPmPhone"></div>
+            <div class="form-group"><label>Network</label><select id="newPmNetwork"><option>MTN</option><option>Airtel Tigo</option><option>Telecel</option></select></div>
+        </div>
+    </div>`, async () => {
+        const fn = document.getElementById('newFirstName').value.trim();
+        const ln = document.getElementById('newLastName').value.trim();
+        const em = document.getElementById('newEmail').value.trim();
+        const ph = document.getElementById('newPhone').value.trim();
+        const pw = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+        const rate = parseFloat(document.getElementById('newRate').value) || 15;
+        const pto = parseInt(document.getElementById('newPTO').value) || 15;
+        const pm = document.getElementById('newPayMethod').value;
+        if (!fn || !ln || !em || !pw) { showToast('Fill all required fields', 'error'); return; }
+
+        const body = { email: em, password: pw, first_name: fn, last_name: ln, role, phone: ph, rate, pto_balance: pto, payment_method: pm };
+        if (pm === 'mobile_money') {
+            body.payment_phone = document.getElementById('newPmPhone')?.value || '';
+            body.payment_network = document.getElementById('newPmNetwork')?.value || 'MTN';
+        } else {
+            body.bank_name = document.getElementById('newBankName')?.value || '';
+            body.bank_account = document.getElementById('newAcctNum')?.value || '';
+        }
+        try {
+            await API.post('/api/users', body);
+            closeModal(); showToast('Agent added!', 'success');
+            renderAgents(document.getElementById('pageContent'));
+        } catch (e) { showToast(e.message, 'error'); }
+    });
+}
+
+function toggleNewPayFields() {
+    const m = document.getElementById('newPayMethod').value;
+    const d = document.getElementById('newPayFields');
+    if (m === 'mobile_money') {
+        d.innerHTML = `<div class="form-row"><div class="form-group"><label>Phone Number</label><input type="text" id="newPmPhone"></div><div class="form-group"><label>Network</label><select id="newPmNetwork"><option>MTN</option><option>Airtel Tigo</option><option>Telecel</option></select></div></div>`;
+    } else {
+        d.innerHTML = `<div class="form-row"><div class="form-group"><label>Bank Name</label><input type="text" id="newBankName"></div><div class="form-group"><label>Account Number</label><input type="text" id="newAcctNum"></div></div>`;
+    }
+}
+
+async function editAgent(id) {
+    try {
+        const users = await API.get('/api/users');
+        const u = users.find(x => x.id === id);
+        if (!u) { showToast('User not found', 'error'); return; }
+
+        showModal('Edit Agent: ' + u.first_name + ' ' + u.last_name, `
+        <div class="form-row">
+            <div class="form-group"><label>First Name</label><input type="text" id="edFirstName" value="${u.first_name}"></div>
+            <div class="form-group"><label>Last Name</label><input type="text" id="edLastName" value="${u.last_name}"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Email</label><input type="email" id="edEmail" value="${u.email}"></div>
+            <div class="form-group"><label>Phone</label><input type="text" id="edPhone" value="${u.phone || ''}"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Role</label><select id="edRole">
+                <option value="agent" ${u.role === 'agent' ? 'selected' : ''}>Agent</option>
+                <option value="supervisor" ${u.role === 'supervisor' ? 'selected' : ''}>Supervisor</option>
+                ${isFullAdmin() ? `<option value="manager" ${u.role === 'manager' ? 'selected' : ''}>Manager</option><option value="administrator" ${u.role === 'administrator' ? 'selected' : ''}>Administrator</option>` : ''}
+            </select></div>
+            <div class="form-group"><label>Pay Rate (GH₵/hr)</label><input type="number" id="edRate" value="${u.rate}"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>PTO Balance</label><input type="number" id="edPTOBal" value="${u.pto_balance}"></div>
+            <div class="form-group"><label>PTO Used</label><input type="number" id="edPTOUsed" value="${u.pto_used}"></div>
+        </div>
+        <div class="form-group"><label>New Password (leave blank to keep)</label><input type="password" id="edPassword" placeholder="Leave blank"></div>
+        <div class="form-group"><label>Payment Method</label><select id="edPayMethod" onchange="toggleEdPayFieldsGeneric()">
+            <option value="mobile_money" ${u.payment_method === 'mobile_money' ? 'selected' : ''}>Mobile Money</option>
+            <option value="bank" ${u.payment_method === 'bank' ? 'selected' : ''}>Bank</option>
+        </select></div>
+        <div id="edPayFields"></div>`, async () => {
+            const data = {
+                first_name: document.getElementById('edFirstName').value.trim(),
+                last_name: document.getElementById('edLastName').value.trim(),
+                email: document.getElementById('edEmail').value.trim(),
+                phone: document.getElementById('edPhone').value.trim(),
+                role: document.getElementById('edRole').value,
+                rate: parseFloat(document.getElementById('edRate').value),
+                pto_balance: parseInt(document.getElementById('edPTOBal').value),
+                pto_used: parseInt(document.getElementById('edPTOUsed').value),
+                payment_method: document.getElementById('edPayMethod').value
+            };
+            const pw = document.getElementById('edPassword').value;
+            if (pw) data.password = pw;
+            if (data.payment_method === 'mobile_money') {
+                data.payment_phone = document.getElementById('edPmPhone')?.value || '';
+                data.payment_network = document.getElementById('edPmNetwork')?.value || 'MTN';
+            } else {
+                data.bank_name = document.getElementById('edBankName')?.value || '';
+                data.bank_account = document.getElementById('edAcctNum')?.value || '';
+            }
+            try {
+                await API.put('/api/users/' + id, data);
+                if (id === currentUser.id) await refreshCurrentUser();
+                closeModal(); showToast('Agent updated!', 'success');
+                renderAgents(document.getElementById('pageContent'));
+            } catch (e) { showToast(e.message, 'error'); }
+        });
+        // Populate payment fields after modal renders
+        setTimeout(() => {
+            const m = u.payment_method;
+            const d = document.getElementById('edPayFields');
+            if (!d) return;
+            if (m === 'mobile_money') {
+                d.innerHTML = `<div class="form-row"><div class="form-group"><label>Phone</label><input type="text" id="edPmPhone" value="${u.payment_phone || ''}"></div><div class="form-group"><label>Network</label><select id="edPmNetwork"><option ${u.payment_network === 'MTN' ? 'selected' : ''}>MTN</option><option ${u.payment_network === 'Airtel Tigo' ? 'selected' : ''}>Airtel Tigo</option><option ${u.payment_network === 'Telecel' ? 'selected' : ''}>Telecel</option></select></div></div>`;
+            } else {
+                d.innerHTML = `<div class="form-row"><div class="form-group"><label>Bank Name</label><input type="text" id="edBankName" value="${u.bank_name || ''}"></div><div class="form-group"><label>Account Number</label><input type="text" id="edAcctNum" value="${u.bank_account || ''}"></div></div>`;
+            }
+        }, 50);
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+function toggleEdPayFieldsGeneric() {
+    const m = document.getElementById('edPayMethod').value;
+    const d = document.getElementById('edPayFields');
+    if (!d) return;
+    if (m === 'mobile_money') {
+        d.innerHTML = `<div class="form-row"><div class="form-group"><label>Phone</label><input type="text" id="edPmPhone"></div><div class="form-group"><label>Network</label><select id="edPmNetwork"><option>MTN</option><option>Airtel Tigo</option><option>Telecel</option></select></div></div>`;
+    } else {
+        d.innerHTML = `<div class="form-row"><div class="form-group"><label>Bank Name</label><input type="text" id="edBankName"></div><div class="form-group"><label>Account Number</label><input type="text" id="edAcctNum"></div></div>`;
+    }
+}
+
+async function deactivateAgent(id) {
+    if (!confirm('Deactivate this agent?')) return;
+    try {
+        await API.delete('/api/users/' + id);
+        showToast('Agent deactivated', 'success');
+        renderAgents(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ==================== ADMIN: PAYROLL ====================
+async function renderAdminPayroll(c) {
+    if (!isAdmin()) { c.innerHTML = '<div class="card"><h3>Access Denied</h3></div>'; return; }
+    try {
+        const [agents, payroll] = await Promise.all([
+            API.get('/api/users'),
+            API.get('/api/payroll')
+        ]);
+        const month = new Date().toISOString().slice(0, 7);
+        let rows = '';
+        let totalPayroll = 0;
+
+        for (const u of agents) {
+            let summary;
+            try { summary = await API.get('/api/time-entries/summary?user_id=' + u.id + '&month=' + month); } catch (e) { summary = { total_hours: 0 }; }
+            const hours = summary.total_hours || 0;
+            const gross = hours * u.rate;
+            const net = gross;
+            totalPayroll += net;
+            const pm = u.payment_method === 'mobile_money' ? `📱 ${u.payment_network || 'MTN'} ${u.payment_phone || ''}` : `🏦 ${u.bank_name || ''} ${u.bank_account || ''}`;
+            rows += `<tr>
+                <td><strong>${u.first_name} ${u.last_name}</strong></td>
+                <td>${hours.toFixed(1)}</td><td>GH₵${u.rate}</td><td>GH₵${gross.toFixed(2)}</td>
+                <td><strong>GH₵${net.toFixed(2)}</strong></td>
+                <td style="font-size:.75rem">${pm}</td>
+                <td><button class="btn btn-success btn-sm" onclick="processPayment(${u.id},'${month}')">💸 Pay</button></td>
+            </tr>`;
+        }
+
+        c.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value">GH₵${totalPayroll.toFixed(2)}</div><div class="stat-label">Total Payroll (${month})</div></div>
+            <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">${agents.length}</div><div class="stat-label">Active Users</div></div>
+        </div>
+        <div class="card">
+            <h3>Current Period Payroll</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Agent</th><th>Hours</th><th>Rate</th><th>Gross</th><th>Net</th><th>Payment</th><th>Action</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <h3>📜 Payment History</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Agent</th><th>Period</th><th>Net Pay</th><th>Method</th><th>Status</th></tr></thead>
+                    <tbody>
+                    ${payroll.map(p => `<tr>
+                        <td>${p.first_name ? p.first_name + ' ' + p.last_name : 'Agent #' + p.user_id}</td>
+                        <td>${p.period}</td><td>GH₵${p.net_pay.toFixed(2)}</td><td>${p.method || '—'}</td>
+                        <td><span class="badge badge-success">${capitalize(p.status)}</span></td>
+                    </tr>`).join('')}
+                    ${payroll.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--text-light)">No history</td></tr>' : ''}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+async function processPayment(userId, period) {
+    if (!confirm('Process payment for this agent?')) return;
+    try {
+        const res = await API.post('/api/payroll/process', { user_id: userId, period });
+        showToast(res.message || 'Payment processed!', 'success');
+        renderAdminPayroll(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ==================== ADMIN: PTO ====================
+async function renderAdminPTO(c) {
+    if (!isAdmin()) { c.innerHTML = '<div class="card"><h3>Access Denied</h3></div>'; return; }
+    try {
+        const ptoList = await API.get('/api/pto');
+        const pending = ptoList.filter(p => p.status === 'pending');
+        const approved = ptoList.filter(p => p.status === 'approved');
+        const denied = ptoList.filter(p => p.status === 'denied');
+
+        c.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${pending.length}</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${approved.length}</div><div class="stat-label">Approved</div></div>
+            <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-value">${denied.length}</div><div class="stat-label">Denied</div></div>
+        </div>
+        <div class="card">
+            <h3>All PTO Requests</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Agent</th><th>Dates</th><th>Days</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    ${ptoList.map(p => `<tr>
+                        <td>${p.first_name ? p.first_name + ' ' + p.last_name : 'Agent #' + p.user_id}</td>
+                        <td>${p.start_date} → ${p.end_date}</td><td>${p.days}</td><td>${p.reason}</td>
+                        <td><span class="badge badge-${p.status === 'approved' ? 'success' : p.status === 'pending' ? 'warning' : 'danger'}">${capitalize(p.status)}</span></td>
+                        <td>${p.status === 'pending' ? `
+                            <button class="btn btn-success btn-sm" onclick="approvePTO(${p.id})">✅</button>
+                            <button class="btn btn-danger btn-sm" onclick="denyPTO(${p.id})">❌</button>` : ''}
+                        </td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+async function approvePTO(id) {
+    try {
+        await API.put('/api/pto/' + id, { status: 'approved' });
+        showToast('PTO approved!', 'success');
+        renderAdminPTO(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function denyPTO(id) {
+    try {
+        await API.put('/api/pto/' + id, { status: 'denied' });
+        showToast('PTO denied', 'success');
+        renderAdminPTO(document.getElementById('pageContent'));
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ==================== ADMIN: USERS ====================
+async function renderAdminUsers(c) {
+    if (!isFullAdmin()) { c.innerHTML = '<div class="card"><h3>Access Denied — Administrator Only</h3></div>'; return; }
+    try {
+        const allUsers = await API.get('/api/users');
+        const admins = allUsers.filter(u => ['administrator', 'manager', 'supervisor'].includes(u.role));
+
+        c.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:.9rem;color:var(--text-light)">${admins.length} admin users</div>
+            <button class="btn btn-primary" onclick="showAddAgentModal()">➕ Add Admin User</button>
+        </div>
+        <div class="card">
+            <h3>🔐 Access Levels</h3>
+            <div style="margin-bottom:20px;font-size:.85rem;color:var(--text-light);">
+                <p><strong>Administrator:</strong> Full access — manage all users, payroll, settings</p>
+                <p><strong>Manager:</strong> Manage agents, approve PTO, view payroll</p>
+                <p><strong>Supervisor:</strong> View agents, approve PTO</p>
+                <p><strong>Agent:</strong> Self-service — clock, timesheet, PTO, profile</p>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Admin & Manager Users</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    ${admins.map(u => `<tr>
+                        <td><strong>${u.first_name} ${u.last_name}</strong></td>
+                        <td>${u.email}</td>
+                        <td><span class="badge badge-info">${capitalize(u.role)}</span></td>
+                        <td>
+                            <button class="btn btn-outline btn-sm" onclick="editAgent(${u.id})">✏️ Edit</button>
+                            ${u.id !== currentUser.id ? `<button class="btn btn-danger btn-sm" onclick="deactivateAgent(${u.id})">🗑️</button>` : ''}
+                        </td>
+                    </tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    } catch (e) {
+        c.innerHTML = `<div class="card"><h3>Error</h3><p>${e.message}</p></div>`;
+    }
+}
+
+// ==================== SETTINGS ====================
+function renderSettings(c) {
+    if (!isAdmin()) { c.innerHTML = '<div class="card"><h3>Access Denied</h3></div>'; return; }
+    const co = company;
+    c.innerHTML = `
+    <div class="card">
+        <h3>🏢 Company Information</h3>
+        <div class="form-row">
+            <div class="form-group"><label>Company Name</label><input type="text" id="coName" value="${co.name}"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="coEmail" value="${co.email}"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Phone</label><input type="text" id="coPhone" value="${co.phone}"></div>
+            <div class="form-group"><label>Provider</label><input type="text" id="coProvider" value="${co.provider}"></div>
+        </div>
+        <div class="form-group"><label>Address</label><input type="text" id="coAddress" value="${co.address}"></div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="saveSettings()">Save Settings</button></div>
+    </div>
+    <div class="card">
+        <h3>📱 Mobile Money Integration (Ghana)</h3>
+        <p style="font-size:.85rem;color:var(--text-light);margin-bottom:16px;">Payment processing via MTN MoMo, Airtel Tigo Money, and Telecel Cash.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+            <div style="border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;">
+                <div style="font-size:2rem;">📱</div><strong>MTN MoMo</strong>
+                <div style="font-size:.8rem;color:var(--text-light);">Primary</div>
+                <span class="badge badge-success" style="margin-top:8px;">Connected</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;">
+                <div style="font-size:2rem;">📱</div><strong>Airtel Tigo</strong>
+                <div style="font-size:.8rem;color:var(--text-light);">Secondary</div>
+                <span class="badge badge-success" style="margin-top:8px;">Connected</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;">
+                <div style="font-size:2rem;">📱</div><strong>Telecel</strong>
+                <div style="font-size:.8rem;color:var(--text-light);">Secondary</div>
+                <span class="badge badge-success" style="margin-top:8px;">Connected</span>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <h3>🏦 Bank Integration</h3>
+        <p style="font-size:.85rem;color:var(--text-light);">Supports direct bank transfers to major Ghanaian banks including GCB, Ecobank, Fidelity, Stanbic, Absa, and others.</p>
+    </div>`;
+}
+
+function saveSettings() {
+    company.name = document.getElementById('coName').value.trim();
+    company.email = document.getElementById('coEmail').value.trim();
+    company.phone = document.getElementById('coPhone').value.trim();
+    company.provider = document.getElementById('coProvider').value.trim();
+    company.address = document.getElementById('coAddress').value.trim();
+    showToast('Settings saved!', 'success');
+}
+
+// ==================== MODAL ====================
+function showModal(title, bodyHTML, onSave) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'activeModal';
+    overlay.innerHTML = `
+    <div class="modal">
+        <div class="modal-header"><h3>${title}</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+        <div class="modal-body">${bodyHTML}</div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('modalSaveBtn').addEventListener('click', onSave);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+}
+
+function closeModal() {
+    const m = document.getElementById('activeModal');
+    if (m) m.remove();
+}
+
+// ==================== TABS ====================
+function switchTab(btn, tabId) {
+    btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const card = btn.closest('.card');
+    card.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+}
+
+// ==================== TOAST ====================
+function showToast(msg, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+    toast.innerHTML = `<span style="font-size:1.2rem;">${icons[type] || icons.info}</span><span style="font-size:.9rem;">${msg}</span>`;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => { toast.style.animation = 'slideOut .3s forwards'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ==================== UTILS ====================
+function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function getToday() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+// ==================== AUTO-CHECK SESSION ====================
+async function checkSession() {
+    try {
+        const user = await API.get('/api/me');
+        if (user && user.id) {
+            currentUser = {
+                id: user.id, email: user.email, firstName: user.first_name,
+                lastName: user.last_name, role: user.role, phone: user.phone,
+                rate: user.rate, paymentMethod: user.payment_method,
+                paymentDetails: user.payment_method === 'mobile_money'
+                    ? { phone: user.payment_phone, network: user.payment_network }
+                    : { bankName: user.bank_name, accountNumber: user.bank_account },
+                pto_balance: user.pto_balance, pto_used: user.pto_used,
+                hireDate: user.hire_date, active: !!user.active
+            };
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('appShell').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+            document.getElementById('userRole').textContent = capitalize(currentUser.role);
+            document.getElementById('userAvatar').textContent = currentUser.firstName[0];
+            updateNav(); navigateTo('dashboard'); startTopClock();
+        }
+    } catch (e) { /* not logged in, show login page */ }
+}
+
+// Check for existing session on load
+checkSession();
+</script>
+</body>
+</html>
